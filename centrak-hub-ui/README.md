@@ -1,31 +1,26 @@
-# About zip
+# centrak-hub-ui
 
-**This package will include directories:**
+This repository contains the React UI for centrak-hub. We keep a single frontend app:
 
-### 1.react-scripts folder
+- `centrak-hub-ui-base` (Create React App + TypeScript, MUI)
 
-- Using react script & react router.
+## Dev
 
-### 2.nextjs folder
+1) Backend API (Laravel)
+- From repo root: `cd centrak-hub && php artisan serve` → http://localhost:8000
 
-- Using for Next.Js
+2) Frontend
+- From repo root: `cd centrak-hub-ui/centrak-hub-ui-base`
+- Install deps: `yarn` (or `npm i`)
+- Start dev: `yarn start` (or `npm start`) → http://localhost:3000
+- Dev proxy to API is preconfigured in `package.json` (`proxy: http://localhost:8000`).
 
-### 3.simple folder
+## Build for Laravel
 
-- To remove unnecessary components. This is a simplified version ([https://simple-minimals.vercel.app](https://simple-minimals.vercel.app))
-- Good to start a new project. You can copy components from the full version.
-- Make sure to install the dependencies exactly as compared to the full version
+- From `centrak-hub-ui/centrak-hub-ui-base` run: `yarn build:php`
+- This builds the React app and copies to `centrak-hub/public/app`
+- Access integrated UI at http://localhost:8000/app
 
-**NOTE:**
-
-**1 - Recommended environment:**
-
-- node js 14.x (suggestion v14.17.3)
-- npm 6+
-
-**2 - After downloading and extracting please do not delete any files.**
-
-- For React Script : Run command `npm install` & `npm start` (or yarn install & yarn start).
-- For Next.Js : Run command `npm install` & `npm run dev` (or yarn install & yarn dev).
-
-[Learn more:](https://docs-minimals.vercel.app/quick-start/requirements)
+Tip: You can also use helper scripts from the repo root:
+- `./start-dev.ps1` to run API + React together
+- `./build-and-serve.ps1` to build UI and serve with Laravel
