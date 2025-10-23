@@ -1,0 +1,78 @@
+# OS/IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*.orig
+
+# Logs and caches
+*.log
+*.pid
+*.seed
+*.pid.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+.cache/
+coverage/
+
+# Root env files
+.env
+.env.*
+
+# Laravel (scoped to centrak-hub, keep GPS-Tracker for backward compat)
+centrak-hub/vendor/
+centrak-hub/node_modules/
+centrak-hub/.env
+centrak-hub/.env.*
+centrak-hub/storage/*.key
+centrak-hub/storage/framework/
+centrak-hub/storage/logs/
+centrak-hub/bootstrap/cache/
+centrak-hub/public/hot
+centrak-hub/public/storage
+# React build copied into Laravel
+centrak-hub/public/app/
+# PHPUnit cache
+centrak-hub/.phpunit.result.cache
+centrak-hub/Homestead.yaml
+centrak-hub/Homestead.json
+centrak-hub/.vagrant/
+
+# Backward compatibility (if folder not yet renamed)
+GPS-Tracker/vendor/
+GPS-Tracker/node_modules/
+GPS-Tracker/.env
+GPS-Tracker/.env.*
+GPS-Tracker/storage/*.key
+GPS-Tracker/storage/framework/
+GPS-Tracker/storage/logs/
+GPS-Tracker/bootstrap/cache/
+GPS-Tracker/public/hot
+GPS-Tracker/public/storage
+GPS-Tracker/public/app/
+GPS-Tracker/.phpunit.result.cache
+GPS-Tracker/Homestead.yaml
+GPS-Tracker/Homestead.json
+GPS-Tracker/.vagrant/
+
+# Frontend React apps (centrak-hub-ui; keep front_end for compat)
+centrak-hub-ui/**/node_modules/
+centrak-hub-ui/**/build/
+centrak-hub-ui/**/.env.local
+centrak-hub-ui/**/.env.*
+centrak-hub-ui/**/.pnp
+centrak-hub-ui/**/.pnp.js
+centrak-hub-ui/**/.turbo
+
+# Backward compatibility ignores
+front_end/**/node_modules/
+front_end/**/build/
+front_end/**/.env.local
+front_end/**/.env.*
+front_end/**/.pnp
+front_end/**/.pnp.js
+front_end/**/.turbo
