@@ -1,20 +1,34 @@
 import { useEffect, useState } from 'react';
-import { Container, Card, CardHeader, Table, TableHead, TableRow, TableCell, TableBody, Alert, TextField, Chip } from '@mui/material';
+import {
+  Container,
+  Card,
+  CardHeader,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Alert,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { get } from '../api/client';
 import ApiKeyInput from '../components/ApiKeyInput';
 import TableSkeleton from '../components/TableSkeleton';
 import EmptyState from '../components/EmptyState';
+import { formatDateTime } from '../utils';
 
-type User = {
+type Configuration = {
   id: number;
-  name?: string;
-  email?: string;
-  admin?: boolean;
-  enabled?: boolean;
+  key?: string;
+  value?: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
-export default function Users() {
-  const [items, setItems] = useState<User[]>([]);
+export default function Configurations() {
+  const [items, setItems] = useState<Configuration[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
@@ -23,7 +37,7 @@ export default function Users() {
     setLoading(true);
     setError(null);
     try {
-      const data = await get<User[]>('/user');
+      const data = await get<Configuration[]>('/configuration');
       setItems(data || []);
     } catch (e: any) {
       setError(e.message || 'Failed to load');
@@ -40,7 +54,11 @@ export default function Users() {
   const filteredItems = items.filter((item) => {
     if (!filter) return true;
     const searchTerm = filter.toLowerCase();
-    return item.name?.toLowerCase().includes(searchTerm) || item.email?.toLowerCase().includes(searchTerm);
+    return (
+      item.key?.toLowerCase().includes(searchTerm) ||
+      item.value?.toLowerCase().includes(searchTerm) ||
+      item.description?.toLowerCase().includes(searchTerm)
+    );
   });
 
   return (
@@ -63,15 +81,15 @@ export default function Users() {
       )}
 
       <Card>
-        <CardHeader title={loading ? 'Users (loading...)' : `Users (${filteredItems.length})`} />
+        <CardHeader title={loading ? 'Configurations (loading...)' : `Configurations (${filteredItems.length})`} />
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Admin</TableCell>
-              <TableCell>Enabled</TableCell>
+              <TableCell>Key</TableCell>
+              <TableCell>Value</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Created At</TableCell>
+              <TableCell>Updated At</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -80,29 +98,25 @@ export default function Users() {
             ) : filteredItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5}>
-                  <EmptyState message="No users found" />
+                  <EmptyState message="No configurations found" />
                 </TableCell>
               </TableRow>
             ) : (
               filteredItems.map((item) => (
                 <TableRow key={item.id} hover>
-                  <TableCell>{item.id}</TableCell>
-                  <TableCell>{item.name || '-'}</TableCell>
-                  <TableCell>{item.email || '-'}</TableCell>
                   <TableCell>
-                    <Chip
-                      label={item.admin ? 'Yes' : 'No'}
-                      color={item.admin ? 'warning' : 'default'}
-                      size="small"
-                    />
+                    <Typography variant="body2" fontFamily="monospace">
+                      {item.key || '-'}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={item.enabled ? 'Yes' : 'No'}
-                      color={item.enabled ? 'success' : 'default'}
-                      size="small"
-                    />
+                    <Typography variant="body2" fontFamily="monospace">
+                      {item.value || '-'}
+                    </Typography>
                   </TableCell>
+                  <TableCell>{item.description || '-'}</TableCell>
+                  <TableCell>{formatDateTime(item.created_at)}</TableCell>
+                  <TableCell>{formatDateTime(item.updated_at)}</TableCell>
                 </TableRow>
               ))
             )}

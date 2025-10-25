@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Container, Card, CardHeader, Table, TableHead, TableRow, TableCell, TableBody, Alert, Stack, TextField, Button } from '@mui/material';
+import { Container, Card, CardHeader, Table, TableHead, TableRow, TableCell, TableBody, Alert, TextField, Stack, Button, Chip } from '@mui/material';
 import { get } from '../api/client';
+import ApiKeyInput from '../components/ApiKeyInput';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
+import { formatDateTime } from '../utils';
 
 type Trip = {
   id: number;
@@ -20,7 +24,6 @@ export default function Trips() {
   const [items, setItems] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('apiKey') || '');
   const [filters, setFilters] = useState({ start_at: '', end_at: '' });
 
   const load = async () => {
@@ -44,25 +47,37 @@ export default function Trips() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const saveApiKey = () => {
-    localStorage.setItem('apiKey', apiKey.trim());
-    load();
-  };
-
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: 2 }}>
-        <TextField fullWidth size="small" label="API Key (Bearer UUID)" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
-        <Button variant="contained" onClick={saveApiKey}>Save Key</Button>
-      </Stack>
+      <ApiKeyInput onSave={load} />
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: 2 }}>
-        <TextField type="datetime-local" size="small" label="Start At" InputLabelProps={{ shrink: true }} value={filters.start_at} onChange={(e) => setFilters((f) => ({ ...f, start_at: e.target.value }))} />
-        <TextField type="datetime-local" size="small" label="End At" InputLabelProps={{ shrink: true }} value={filters.end_at} onChange={(e) => setFilters((f) => ({ ...f, end_at: e.target.value }))} />
-        <Button variant="outlined" onClick={load}>Filter</Button>
+        <TextField
+          type="datetime-local"
+          size="small"
+          label="Start At"
+          InputLabelProps={{ shrink: true }}
+          value={filters.start_at}
+          onChange={(e) => setFilters((f) => ({ ...f, start_at: e.target.value }))}
+        />
+        <TextField
+          type="datetime-local"
+          size="small"
+          label="End At"
+          InputLabelProps={{ shrink: true }}
+          value={filters.end_at}
+          onChange={(e) => setFilters((f) => ({ ...f, end_at: e.target.value }))}
+        />
+        <Button variant="outlined" onClick={load}>
+          Filter
+        </Button>
       </Stack>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       <Card>
         <CardHeader title={loading ? 'Trips (loading...)' : `Trips (${items.length})`} />
@@ -80,22 +95,37 @@ export default function Trips() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {items.map((t) => (
-              <TableRow key={t.id} hover>
-                <TableCell>{t.id}</TableCell>
-                <TableCell>{t.name || '-'}</TableCell>
-                <TableCell>{t.code || '-'}</TableCell>
-                <TableCell>{t.start_at || '-'}</TableCell>
-                <TableCell>{t.end_at || '-'}</TableCell>
-                <TableCell>{t.distance_human ?? t.distance ?? '-'}</TableCell>
-                <TableCell>{t.time_human ?? t.time ?? '-'}</TableCell>
-                <TableCell>{t.shared ? 'Yes' : 'No'}</TableCell>
+            {loading ? (
+              <TableSkeleton rows={5} columns={8} />
+            ) : items.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8}>
+                  <EmptyState message="No trips found" />
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              items.map((t) => (
+                <TableRow key={t.id} hover>
+                  <TableCell>{t.id}</TableCell>
+                  <TableCell>{t.name || '-'}</TableCell>
+                  <TableCell>{t.code || '-'}</TableCell>
+                  <TableCell>{formatDateTime(t.start_at)}</TableCell>
+                  <TableCell>{formatDateTime(t.end_at)}</TableCell>
+                  <TableCell>{t.distance_human ?? t.distance ?? '-'}</TableCell>
+                  <TableCell>{t.time_human ?? t.time ?? '-'}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={t.shared ? 'Yes' : 'No'}
+                      color={t.shared ? 'success' : 'default'}
+                      size="small"
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </Card>
     </Container>
   );
 }
-

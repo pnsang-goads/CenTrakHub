@@ -1,18 +1,34 @@
 import { useEffect, useState } from 'react';
-import { Container, Card, CardHeader, Table, TableHead, TableRow, TableCell, TableBody, Alert, TextField } from '@mui/material';
+import {
+  Container,
+  Card,
+  CardHeader,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Alert,
+  TextField,
+  Chip,
+} from '@mui/material';
 import { get } from '../api/client';
 import ApiKeyInput from '../components/ApiKeyInput';
 import TableSkeleton from '../components/TableSkeleton';
 import EmptyState from '../components/EmptyState';
+import { formatDateTime } from '../utils';
 
-type Timezone = {
+type Server = {
   id: number;
-  zone?: string;
-  name?: string;
+  port?: number;
+  protocol?: string;
+  created_at?: string;
+  debug?: boolean;
+  enabled?: boolean;
 };
 
-export default function Timezones() {
-  const [items, setItems] = useState<Timezone[]>([]);
+export default function Servers() {
+  const [items, setItems] = useState<Server[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
@@ -21,7 +37,7 @@ export default function Timezones() {
     setLoading(true);
     setError(null);
     try {
-      const data = await get<Timezone[]>('/timezone');
+      const data = await get<Server[]>('/server');
       setItems(data || []);
     } catch (e: any) {
       setError(e.message || 'Failed to load');
@@ -38,7 +54,10 @@ export default function Timezones() {
   const filteredItems = items.filter((item) => {
     if (!filter) return true;
     const searchTerm = filter.toLowerCase();
-    return item.zone?.toLowerCase().includes(searchTerm) || item.name?.toLowerCase().includes(searchTerm);
+    return (
+      item.port?.toString().includes(searchTerm) ||
+      item.protocol?.toLowerCase().includes(searchTerm)
+    );
   });
 
   return (
@@ -61,28 +80,46 @@ export default function Timezones() {
       )}
 
       <Card>
-        <CardHeader title={loading ? 'Timezones (loading...)' : `Timezones (${filteredItems.length})`} />
+        <CardHeader title={loading ? 'Servers (loading...)' : `Servers (${filteredItems.length})`} />
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Zone</TableCell>
-              <TableCell>Name</TableCell>
+              <TableCell>Port</TableCell>
+              <TableCell>Protocol</TableCell>
+              <TableCell>Created At</TableCell>
+              <TableCell>Debug</TableCell>
+              <TableCell>Enabled</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
-              <TableSkeleton rows={5} columns={2} />
+              <TableSkeleton rows={5} columns={5} />
             ) : filteredItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={2}>
-                  <EmptyState message="No timezones found" />
+                <TableCell colSpan={5}>
+                  <EmptyState message="No servers found" />
                 </TableCell>
               </TableRow>
             ) : (
               filteredItems.map((item) => (
                 <TableRow key={item.id} hover>
-                  <TableCell>{item.zone || '-'}</TableCell>
-                  <TableCell>{item.name || '-'}</TableCell>
+                  <TableCell>{item.port || '-'}</TableCell>
+                  <TableCell>{item.protocol || '-'}</TableCell>
+                  <TableCell>{formatDateTime(item.created_at)}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={item.debug ? 'Yes' : 'No'}
+                      color={item.debug ? 'warning' : 'default'}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={item.enabled ? 'Enabled' : 'Disabled'}
+                      color={item.enabled ? 'success' : 'default'}
+                      size="small"
+                    />
+                  </TableCell>
                 </TableRow>
               ))
             )}

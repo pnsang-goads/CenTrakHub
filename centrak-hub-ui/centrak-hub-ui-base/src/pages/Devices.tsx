@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Container, Card, CardHeader, Table, TableHead, TableRow, TableCell, TableBody, Alert, TextField, Stack, Button } from '@mui/material';
+import { Container, Card, CardHeader, Table, TableHead, TableRow, TableCell, TableBody, Alert, Chip } from '@mui/material';
 import { get } from '../api/client';
+import ApiKeyInput from '../components/ApiKeyInput';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
 
 type Device = {
   id: number;
@@ -19,7 +22,6 @@ export default function Devices() {
   const [items, setItems] = useState<Device[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('apiKey') || '');
 
   const load = async () => {
     setLoading(true);
@@ -39,23 +41,9 @@ export default function Devices() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const saveApiKey = () => {
-    localStorage.setItem('apiKey', apiKey.trim());
-    load();
-  };
-
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
-        <TextField
-          fullWidth
-          size="small"
-          label="API Key (Bearer UUID)"
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-        />
-        <Button variant="contained" onClick={saveApiKey}>Save Key</Button>
-      </Stack>
+      <ApiKeyInput onSave={load} />
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -78,17 +66,33 @@ export default function Devices() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {items.map((d) => (
-              <TableRow key={d.id} hover>
-                <TableCell>{d.id}</TableCell>
-                <TableCell>{d.name || '-'}</TableCell>
-                <TableCell>{d.model || '-'}</TableCell>
-                <TableCell>{d.serial || '-'}</TableCell>
-                <TableCell>{d.phone_number || '-'}</TableCell>
-                <TableCell>{d.enabled ? 'Yes' : 'No'}</TableCell>
-                <TableCell>{d.vehicle?.name || '-'}</TableCell>
+            {loading ? (
+              <TableSkeleton rows={5} columns={7} />
+            ) : items.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7}>
+                  <EmptyState message="No devices found" />
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              items.map((d) => (
+                <TableRow key={d.id} hover>
+                  <TableCell>{d.id}</TableCell>
+                  <TableCell>{d.name || '-'}</TableCell>
+                  <TableCell>{d.model || '-'}</TableCell>
+                  <TableCell>{d.serial || '-'}</TableCell>
+                  <TableCell>{d.phone_number || '-'}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={d.enabled ? 'Yes' : 'No'}
+                      color={d.enabled ? 'success' : 'default'}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>{d.vehicle?.name || '-'}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </Card>

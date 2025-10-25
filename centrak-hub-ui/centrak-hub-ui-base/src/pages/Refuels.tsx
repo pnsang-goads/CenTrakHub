@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Container, Card, CardHeader, Table, TableHead, TableRow, TableCell, TableBody, Alert, TextField, Stack, Button } from '@mui/material';
 import { get } from '../api/client';
+import ApiKeyInput from '../components/ApiKeyInput';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
+import { formatDate, formatNumber } from '../utils';
 
 type Refuel = {
   id: number;
@@ -15,7 +19,6 @@ export default function Refuels() {
   const [items, setItems] = useState<Refuel[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('apiKey') || '');
   const [vehicleId, setVehicleId] = useState<string>('');
 
   const load = async () => {
@@ -33,26 +36,32 @@ export default function Refuels() {
     }
   };
 
-  useEffect(() => { load(); }, []);
-
-  const saveApiKey = () => {
-    localStorage.setItem('apiKey', apiKey.trim());
+  useEffect(() => {
     load();
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: 2 }}>
-        <TextField fullWidth size="small" label="API Key (Bearer UUID)" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
-        <Button variant="contained" onClick={saveApiKey}>Save Key</Button>
-      </Stack>
+      <ApiKeyInput onSave={load} />
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" sx={{ mb: 2 }}>
-        <TextField size="small" label="Vehicle ID" value={vehicleId} onChange={(e) => setVehicleId(e.target.value)} />
-        <Button variant="outlined" onClick={load}>Filter</Button>
+        <TextField
+          size="small"
+          label="Vehicle ID"
+          value={vehicleId}
+          onChange={(e) => setVehicleId(e.target.value)}
+        />
+        <Button variant="outlined" onClick={load}>
+          Filter
+        </Button>
       </Stack>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       <Card>
         <CardHeader title={loading ? 'Refuels (loading...)' : `Refuels (${items.length})`} />
@@ -61,27 +70,36 @@ export default function Refuels() {
             <TableRow>
               <TableCell>ID</TableCell>
               <TableCell>Date</TableCell>
-              <TableCell>Liters</TableCell>
-              <TableCell>Cost</TableCell>
+              <TableCell align="right">Liters</TableCell>
+              <TableCell align="right">Cost</TableCell>
               <TableCell>Vehicle</TableCell>
               <TableCell>User</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {items.map((r) => (
-              <TableRow key={r.id} hover>
-                <TableCell>{r.id}</TableCell>
-                <TableCell>{r.date_at || '-'}</TableCell>
-                <TableCell>{r.liters ?? '-'}</TableCell>
-                <TableCell>{r.cost ?? '-'}</TableCell>
-                <TableCell>{r.vehicle?.name || '-'}</TableCell>
-                <TableCell>{r.user?.name || '-'}</TableCell>
+            {loading ? (
+              <TableSkeleton rows={5} columns={6} />
+            ) : items.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6}>
+                  <EmptyState message="No refuels found" />
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              items.map((r) => (
+                <TableRow key={r.id} hover>
+                  <TableCell>{r.id}</TableCell>
+                  <TableCell>{formatDate(r.date_at)}</TableCell>
+                  <TableCell align="right">{formatNumber(r.liters, 2)}</TableCell>
+                  <TableCell align="right">{formatNumber(r.cost, 2)}</TableCell>
+                  <TableCell>{r.vehicle?.name || '-'}</TableCell>
+                  <TableCell>{r.user?.name || '-'}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </Card>
     </Container>
   );
 }
-

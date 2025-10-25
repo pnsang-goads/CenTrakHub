@@ -1,18 +1,36 @@
 import { useEffect, useState } from 'react';
-import { Container, Card, CardHeader, Table, TableHead, TableRow, TableCell, TableBody, Alert, TextField } from '@mui/material';
+import {
+  Container,
+  Card,
+  CardHeader,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Alert,
+  TextField,
+} from '@mui/material';
 import { get } from '../api/client';
 import ApiKeyInput from '../components/ApiKeyInput';
 import TableSkeleton from '../components/TableSkeleton';
 import EmptyState from '../components/EmptyState';
+import { formatDateTime, formatCoordinates } from '../utils';
 
-type Timezone = {
+type City = {
   id: number;
-  zone?: string;
   name?: string;
+  alias?: string[];
+  state?: { name: string };
+  country?: { name: string };
+  latitude?: number;
+  longitude?: number;
+  created_at?: string;
+  updated_at?: string;
 };
 
-export default function Timezones() {
-  const [items, setItems] = useState<Timezone[]>([]);
+export default function Cities() {
+  const [items, setItems] = useState<City[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
@@ -21,7 +39,7 @@ export default function Timezones() {
     setLoading(true);
     setError(null);
     try {
-      const data = await get<Timezone[]>('/timezone');
+      const data = await get<City[]>('/city');
       setItems(data || []);
     } catch (e: any) {
       setError(e.message || 'Failed to load');
@@ -38,7 +56,12 @@ export default function Timezones() {
   const filteredItems = items.filter((item) => {
     if (!filter) return true;
     const searchTerm = filter.toLowerCase();
-    return item.zone?.toLowerCase().includes(searchTerm) || item.name?.toLowerCase().includes(searchTerm);
+    return (
+      item.name?.toLowerCase().includes(searchTerm) ||
+      item.alias?.some((a) => a.toLowerCase().includes(searchTerm)) ||
+      item.state?.name?.toLowerCase().includes(searchTerm) ||
+      item.country?.name?.toLowerCase().includes(searchTerm)
+    );
   });
 
   return (
@@ -61,28 +84,38 @@ export default function Timezones() {
       )}
 
       <Card>
-        <CardHeader title={loading ? 'Timezones (loading...)' : `Timezones (${filteredItems.length})`} />
+        <CardHeader title={loading ? 'Cities (loading...)' : `Cities (${filteredItems.length})`} />
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Zone</TableCell>
               <TableCell>Name</TableCell>
+              <TableCell>Alias</TableCell>
+              <TableCell>State</TableCell>
+              <TableCell>Country</TableCell>
+              <TableCell>Coordinates</TableCell>
+              <TableCell>Created At</TableCell>
+              <TableCell>Updated At</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
-              <TableSkeleton rows={5} columns={2} />
+              <TableSkeleton rows={5} columns={7} />
             ) : filteredItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={2}>
-                  <EmptyState message="No timezones found" />
+                <TableCell colSpan={7}>
+                  <EmptyState message="No cities found" />
                 </TableCell>
               </TableRow>
             ) : (
               filteredItems.map((item) => (
                 <TableRow key={item.id} hover>
-                  <TableCell>{item.zone || '-'}</TableCell>
                   <TableCell>{item.name || '-'}</TableCell>
+                  <TableCell>{item.alias?.join(', ') || '-'}</TableCell>
+                  <TableCell>{item.state?.name || '-'}</TableCell>
+                  <TableCell>{item.country?.name || '-'}</TableCell>
+                  <TableCell>{formatCoordinates(item.latitude, item.longitude)}</TableCell>
+                  <TableCell>{formatDateTime(item.created_at)}</TableCell>
+                  <TableCell>{formatDateTime(item.updated_at)}</TableCell>
                 </TableRow>
               ))
             )}

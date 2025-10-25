@@ -1,18 +1,33 @@
 import { useEffect, useState } from 'react';
-import { Container, Card, CardHeader, Table, TableHead, TableRow, TableCell, TableBody, Alert, TextField } from '@mui/material';
+import {
+  Container,
+  Card,
+  CardHeader,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Alert,
+  TextField,
+} from '@mui/material';
 import { get } from '../api/client';
 import ApiKeyInput from '../components/ApiKeyInput';
 import TableSkeleton from '../components/TableSkeleton';
 import EmptyState from '../components/EmptyState';
+import { formatDateTime } from '../utils';
 
-type Timezone = {
+type State = {
   id: number;
-  zone?: string;
   name?: string;
+  alias?: string[];
+  country?: { name: string };
+  created_at?: string;
+  updated_at?: string;
 };
 
-export default function Timezones() {
-  const [items, setItems] = useState<Timezone[]>([]);
+export default function States() {
+  const [items, setItems] = useState<State[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
@@ -21,7 +36,7 @@ export default function Timezones() {
     setLoading(true);
     setError(null);
     try {
-      const data = await get<Timezone[]>('/timezone');
+      const data = await get<State[]>('/state');
       setItems(data || []);
     } catch (e: any) {
       setError(e.message || 'Failed to load');
@@ -38,7 +53,11 @@ export default function Timezones() {
   const filteredItems = items.filter((item) => {
     if (!filter) return true;
     const searchTerm = filter.toLowerCase();
-    return item.zone?.toLowerCase().includes(searchTerm) || item.name?.toLowerCase().includes(searchTerm);
+    return (
+      item.name?.toLowerCase().includes(searchTerm) ||
+      item.alias?.some((a) => a.toLowerCase().includes(searchTerm)) ||
+      item.country?.name?.toLowerCase().includes(searchTerm)
+    );
   });
 
   return (
@@ -61,28 +80,34 @@ export default function Timezones() {
       )}
 
       <Card>
-        <CardHeader title={loading ? 'Timezones (loading...)' : `Timezones (${filteredItems.length})`} />
+        <CardHeader title={loading ? 'States (loading...)' : `States (${filteredItems.length})`} />
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Zone</TableCell>
               <TableCell>Name</TableCell>
+              <TableCell>Alias</TableCell>
+              <TableCell>Country</TableCell>
+              <TableCell>Created At</TableCell>
+              <TableCell>Updated At</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
-              <TableSkeleton rows={5} columns={2} />
+              <TableSkeleton rows={5} columns={5} />
             ) : filteredItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={2}>
-                  <EmptyState message="No timezones found" />
+                <TableCell colSpan={5}>
+                  <EmptyState message="No states found" />
                 </TableCell>
               </TableRow>
             ) : (
               filteredItems.map((item) => (
                 <TableRow key={item.id} hover>
-                  <TableCell>{item.zone || '-'}</TableCell>
                   <TableCell>{item.name || '-'}</TableCell>
+                  <TableCell>{item.alias?.join(', ') || '-'}</TableCell>
+                  <TableCell>{item.country?.name || '-'}</TableCell>
+                  <TableCell>{formatDateTime(item.created_at)}</TableCell>
+                  <TableCell>{formatDateTime(item.updated_at)}</TableCell>
                 </TableRow>
               ))
             )}

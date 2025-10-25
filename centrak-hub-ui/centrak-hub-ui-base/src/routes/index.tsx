@@ -38,6 +38,16 @@ export default function Router() {
         { path: 'refuels', element: <Refuels /> },
         { path: 'timezones', element: <Timezones /> },
         { path: 'languages', element: <Languages /> },
+        { path: 'cities', element: <Cities /> },
+        { path: 'countries', element: <Countries /> },
+        { path: 'states', element: <States /> },
+        { path: 'alarms', element: <Alarms /> },
+        { path: 'servers', element: <Servers /> },
+        { path: 'maintenances', element: <Maintenances /> },
+        { path: 'maintenance-items', element: <MaintenanceItems /> },
+        { path: 'configurations', element: <Configurations /> },
+        { path: 'alarm-notifications', element: <AlarmNotifications /> },
+        { path: 'user-sessions', element: <UserSessions /> },
       ],
     },
     {
@@ -60,4 +70,14 @@ const Users = Loadable(lazy(() => import('../pages/Users')));
 const Refuels = Loadable(lazy(() => import('../pages/Refuels')));
 const Timezones = Loadable(lazy(() => import('../pages/Timezones')));
 const Languages = Loadable(lazy(() => import('../pages/Languages')));
+const Cities = Loadable(lazy(() => import('../pages/Cities')));
+const Countries = Loadable(lazy(() => import('../pages/Countries')));
+const States = Loadable(lazy(() => import('../pages/States')));
+const Alarms = Loadable(lazy(() => import('../pages/Alarms')));
+const Servers = Loadable(lazy(() => import('../pages/Servers')));
+const Maintenances = Loadable(lazy(() => import('../pages/Maintenances')));
+const MaintenanceItems = Loadable(lazy(() => import('../pages/MaintenanceItems')));
+const Configurations = Loadable(lazy(() => import('../pages/Configurations')));
+const AlarmNotifications = Loadable(lazy(() => import('../pages/AlarmNotifications')));
+const UserSessions = Loadable(lazy(() => import('../pages/UserSessions')));
 const NotFound = Loadable(lazy(() => import('../pages/Page404')));
