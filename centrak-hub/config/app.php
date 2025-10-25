@@ -170,7 +170,7 @@ return [
         App\Providers\App::class,
         App\Providers\Debug::class,
         App\Providers\Route::class,
-        App\Providers\View::class,
+        // App\Providers\View::class, // Disabled for API-only mode
 
     ],
 

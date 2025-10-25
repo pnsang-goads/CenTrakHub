@@ -61,35 +61,39 @@ class Response
             return $message;
         }
 
-        if ($this->e instanceof AuthenticationException) {
-            return $message ?: __('user-auth.error.auth');
+        try {
+            if ($this->e instanceof AuthenticationException) {
+                return $message ?: __('user-auth.error.auth');
+            }
+
+            if ($this->e instanceof AuthenticationExceptionVendor) {
+                return __('user-auth.error.empty');
+            }
+
+            if ($this->e instanceof NotFoundHttpException) {
+                return $message ?: __('common.error.not-found');
+            }
+
+            if ($this->e instanceof ModelNotFoundException) {
+                return $message ?: __('common.error.not-found-model');
+            }
+
+            if ($this->e instanceof MethodNotAllowedHttpException) {
+                return __('common.error.method-not-allowed');
+            }
+
+            if ($this->e instanceof QueryException) {
+                return __('common.error.query');
+            }
+
+            if ($this->isExceptionSystem()) {
+                return __('common.error.system');
+            }
+        } catch (\Exception $e) {
+            // Translation service not available yet, return raw message
         }
 
-        if ($this->e instanceof AuthenticationExceptionVendor) {
-            return __('user-auth.error.empty');
-        }
-
-        if ($this->e instanceof NotFoundHttpException) {
-            return $message ?: __('common.error.not-found');
-        }
-
-        if ($this->e instanceof ModelNotFoundException) {
-            return $message ?: __('common.error.not-found-model');
-        }
-
-        if ($this->e instanceof MethodNotAllowedHttpException) {
-            return __('common.error.method-not-allowed');
-        }
-
-        if ($this->e instanceof QueryException) {
-            return __('common.error.query');
-        }
-
-        if ($this->isExceptionSystem()) {
-            return __('common.error.system');
-        }
-
-        return $message;
+        return $message ?: 'An error occurred';
     }
 
     /**

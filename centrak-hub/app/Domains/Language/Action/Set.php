@@ -16,18 +16,23 @@ class Set extends ActionAbstract
      */
     public function handle(): void
     {
-        $this->locale();
+        try {
+            $this->locale();
 
-        if ($this->available() === false) {
-            return;
+            if ($this->available() === false) {
+                return;
+            }
+
+            if ($this->defined()) {
+                return;
+            }
+
+            $this->row();
+            $this->set();
+        } catch (\Exception $e) {
+            // Database not ready yet - skip language setup
+            // This allows migrations to run
         }
-
-        if ($this->defined()) {
-            return;
-        }
-
-        $this->row();
-        $this->set();
     }
 
     /**

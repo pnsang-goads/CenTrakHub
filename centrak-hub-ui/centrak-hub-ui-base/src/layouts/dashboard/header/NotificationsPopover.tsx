@@ -19,7 +19,7 @@ import {
 // utils
 import { fToNow } from '../../../utils/formatTime';
 // _mock_
-import { _notifications } from '../../../_mock';
+import { _notifications } from '../../../_mock/index';
 // components
 import Iconify from '../../../components/Iconify';
 import Scrollbar from '../../../components/Scrollbar';
@@ -28,10 +28,20 @@ import { IconButtonAnimate } from '../../../components/animate';
 
 // ----------------------------------------------------------------------
 
-export default function NotificationsPopover() {
-  const [notifications, setNotifications] = useState(_notifications);
+interface Notification {
+  id: string;
+  title: string;
+  description: string;
+  avatar: string | null;
+  type: string;
+  createdAt: Date;
+  isUnRead: boolean;
+}
 
-  const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
+export default function NotificationsPopover() {
+  const [notifications, setNotifications] = useState<Notification[]>(_notifications);
+
+  const totalUnRead = notifications.filter((item: Notification) => item.isUnRead === true).length;
 
   const [open, setOpen] = useState<HTMLElement | null>(null);
 
@@ -45,7 +55,7 @@ export default function NotificationsPopover() {
 
   const handleMarkAllAsRead = () => {
     setNotifications(
-      notifications.map((notification) => ({
+      notifications.map((notification: Notification) => ({
         ...notification,
         isUnRead: false,
       }))
@@ -98,7 +108,7 @@ export default function NotificationsPopover() {
               </ListSubheader>
             }
           >
-            {notifications.slice(0, 2).map((notification) => (
+            {notifications.slice(0, 2).map((notification: Notification) => (
               <NotificationItem key={notification.id} notification={notification} />
             ))}
           </List>
@@ -111,7 +121,7 @@ export default function NotificationsPopover() {
               </ListSubheader>
             }
           >
-            {notifications.slice(2, 5).map((notification) => (
+            {notifications.slice(2, 5).map((notification: Notification) => (
               <NotificationItem key={notification.id} notification={notification} />
             ))}
           </List>

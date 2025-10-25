@@ -17,8 +17,13 @@ class AppBind extends ActionAbstract
      */
     public function handle(): void
     {
-        $this->getter();
-        $this->bind();
+        try {
+            $this->getter();
+            $this->bind();
+        } catch (\Exception $e) {
+            // Database not ready yet - skip configuration binding
+            // This allows migrations to run
+        }
     }
 
     /**

@@ -80,4 +80,5 @@ const MaintenanceItems = Loadable(lazy(() => import('../pages/MaintenanceItems')
 const Configurations = Loadable(lazy(() => import('../pages/Configurations')));
 const AlarmNotifications = Loadable(lazy(() => import('../pages/AlarmNotifications')));
 const UserSessions = Loadable(lazy(() => import('../pages/UserSessions')));
+// eslint-disable-next-line import/extensions
 const NotFound = Loadable(lazy(() => import('../pages/Page404')));

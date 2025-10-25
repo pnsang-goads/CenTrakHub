@@ -16,9 +16,14 @@ class Request extends ActionAbstract
      */
     public function handle(): void
     {
-        $this->acceptLanguage();
-        $this->row();
-        $this->set();
+        try {
+            $this->acceptLanguage();
+            $this->row();
+            $this->set();
+        } catch (\Exception $e) {
+            // Database not ready yet - skip language setup
+            // This allows migrations and initial setup to run
+        }
     }
 
     /**

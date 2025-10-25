@@ -58,7 +58,12 @@ class Handler extends HandlerVendor
             return parent::render($request, $e->getPrevious() ?: $e);
         }
 
-        return app(ErrorController::class)($e);
+        try {
+            return app(ErrorController::class)($e);
+        } catch (\Exception $ex) {
+            // If error controller fails (View not available), return JSON
+            return $this->renderJson($e);
+        }
     }
 
     /**
